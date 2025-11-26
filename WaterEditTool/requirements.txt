@@ -1,0 +1,10 @@
+# ArUco FlowMap 系統必要函式庫
+numpy>=2.0.0
+opencv-contrib-python>=4.10.0
+opencv-python>=4.10.0
+PyQt5>=5.15.9
+filterpy>=1.4.5
+matplotlib>=3.9.0
+scipy>=1.13.0
+python-dotenv>=1.1.0
+pillow>=11.0.0
