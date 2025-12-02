@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scene_Save/Discover 2.unity
+    path: Assets/WaterSimulationScene/WaterDemo.unity
     guid: aa2236ec02472b14fb93c9c6abd55461
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 9c5223d3c35513f4e8f249d6e2da369c,

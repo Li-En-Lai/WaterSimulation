@@ -45,37 +45,47 @@ ExportedObj/
 *.opendb
 *.VC.db
 
-# Unity generated meta files
-*.meta
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
 
+# Unity3D generated file on crash reports
 sysinfo.txt
-mono_crash.*
 
 # Builds
 *.apk
 *.aab
 *.unitypackage
-*.unitypackage.meta
-*.app
 
+# Crashlytics generated file
 crashlytics-build.properties
 
-InitTestScene*.unity*
+# Packed Addressables
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
 
-# Addressables
-/ServerData
-/[Aa]ssets/StreamingAssets/aa*
-/[Aa]ssets/AddressableAssetsData/link.xml*
-/[Aa]ssets/Addressables_Temp*
-/[Aa]ssets/AddressableAssetsData/*/*.bin*
+# Temporary auto-generated Android Assets
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# Visual Scripting auto-generated files
-/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db
-/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db.meta
-/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers
-/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers.meta
+.vscode/
+Assets/Oculus/VR/Editor/Tools/ovr-platform-util.exe
+Assets/Oculus/VR/Editor/Tools/ovr-platform-util.exe.meta
+Assets/Oculus/VR/Editor/Tools.meta
 
-/[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+# XRSim window config
+imgui.ini
+
+# file that contains keystore password to be loaded on Unity launch by script
+keystore-passwords.txt
+
+# Ignore assets added by Meta Avatars SDK during builds
+Assets/StreamingAssets/Oculus
+Assets/StreamingAssets/Oculus.meta
+Assets/StreamingAssets/SampleAssets
+Assets/StreamingAssets/SampleAssets.meta
+Assets/Samples/Meta XR Interaction SDK OVR Samples/
+Assets/Samples/Meta XR Interaction SDK OVR Samples.meta
 
 
 ########################################

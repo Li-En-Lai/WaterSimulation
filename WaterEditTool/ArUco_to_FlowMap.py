@@ -22,6 +22,7 @@ class KalmanMarkerTracker:
         initial_rotation: 初始旋轉角度
         dt: 時間步長（預設為30FPS的倒數）
         """
+        
         self.marker_id = marker_id
         self.last_update_time = time.time()
         self.missed_frames = 0
@@ -1207,6 +1208,9 @@ def main():
     if not cap.isOpened():
         print("無法開啟攝像頭")
         return # 無法返回則退出
+    
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) # 相機捕捉影像寬度
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # 相機捕捉影像高度
@@ -1415,11 +1419,6 @@ def run_tracking(ui, cap, tracker, image_server=None):
     更新UI介面的Marker追蹤畫面&FlowMap -> 控制執行速度，並處理執行過程的錯誤 -> 結束時安全的停止tracker
     """
     try:
-        # # 導入輸出FlowMap的輔助函數[測試用]
-        # from flowmap_export import save_first_flowmap_and_tracking
-        # # 添加標記，用於確保只保存第一張FlowMap
-        # first_frame_saved = False
-
         save_interval = 30  # 每30幀檢查一次是否需要傳送FlowMap
         last_saved_frame = 0  # 上次傳送FlowMap的幀數
 
@@ -1454,18 +1453,6 @@ def run_tracking(ui, cap, tracker, image_server=None):
                         image_server.send_flowmap(img_bytes)
                         last_saved_frame = current_frame
                         print(f"已傳送FlowMap給Client於Frame {current_frame}")
-                
-                # 保存第一張FlowMap和水池追蹤畫面 [測試用]
-                # if not first_frame_saved and tracker.flow_map_generator.current_frame > 30:
-                #     # 等待至少30幀後再保存，確保FlowMap有足夠的數據
-                #     tracking_path, flowmap_path = save_first_flowmap_and_tracking(
-                #         output_frame, 
-                #         tracker.flow_map_generator.accumulated_flowmap
-                #     )
-                #     print(f"已保存第一張FlowMap和水池追蹤畫面")
-                #     print(f"追蹤畫面: {tracking_path}")
-                #     print(f"FlowMap: {flowmap_path}")
-                #     first_frame_saved = True
 
                 # 短暫暫停
                 time.sleep(0.03)  # 約 30 FPS

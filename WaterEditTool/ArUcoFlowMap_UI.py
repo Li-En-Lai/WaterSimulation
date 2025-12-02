@@ -10,14 +10,14 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QPoint, QRect, QSize, QCoreAppl
 
 class FlowMapUI(QMainWindow):
     """主UI視窗類"""
-    # 添加信號
-    start_tracking_signal = pyqtSignal()  # 開始追蹤信號
-    pool_shape_signal = pyqtSignal(str) # 水池形狀信號
+    # 添加訊號
+    start_tracking_signal = pyqtSignal()  # 開始追蹤訊號
+    pool_shape_signal = pyqtSignal(str) # 水池形狀訊號
     
     def __init__(self):
         super().__init__()
         
-        # 新增：儲存當前選擇的水池形狀
+        # 儲存當前選擇的水池形狀
         self.current_pool_shape = "circle"  # 預設為圓形
         
         # 設置窗口標題和大小
@@ -34,7 +34,7 @@ class FlowMapUI(QMainWindow):
         self.perspective_page = PerspectiveCalibrationPage(self)
         self.water_jet_page = WaterJetCalibrationPage(self)
 
-        # 連接水池形狀選擇頁面的信號
+        # 連接水池形狀選擇頁面的訊號
         self.pool_shape_page.pool_shape_signal.connect(self.on_pool_shape_selected)
         
         # 將頁面添加到堆疊式頁面管理器
@@ -43,7 +43,7 @@ class FlowMapUI(QMainWindow):
         self.stacked_widget.addWidget(self.perspective_page)
         self.stacked_widget.addWidget(self.water_jet_page)
         
-        # 初始顯示首頁
+        # 初始顯示HomePage
         self.stacked_widget.setCurrentIndex(0)
     
     def show_home_page(self):
@@ -71,8 +71,9 @@ class FlowMapUI(QMainWindow):
         self.perspective_page.reset_ui_display()
         self.water_jet_page.reset_ui_display()
     
-        # 傳遞信號
+        # 傳遞訊號
         self.pool_shape_signal.emit(shape)
+
         # 更新透視變換頁面的標題內容
         self.perspective_page.update_for_pool_shape(shape)
     
@@ -121,7 +122,7 @@ class HomePage(QWidget):
         bg_label.setScaledContents(True)  # 圖片縮放以填滿整個標籤
         
         # 背景圖片，使用以下程式加載
-        bg_pixmap = QPixmap(r"C:\Users\Li-En_Lai\Desktop\ArUcoMarker_Test\UI_Img\HomePage.png")
+        bg_pixmap = QPixmap(r"WaterEditTool\UI_Images\HomePage.png")
         bg_label.setPixmap(bg_pixmap)
         
         # 創建按鈕區域 (使用透明背景)
@@ -134,22 +135,24 @@ class HomePage(QWidget):
         start_edit_btn = QPushButton("")
         start_edit_btn.setMinimumHeight(60)
         start_edit_btn.setMinimumWidth(200)
-        start_edit_bg_pth = r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/EditButton.png"
+        start_edit_bg_pth = r"WaterEditTool\UI_Images\EditButton.png"
         
         # 設置圖標
         start_edit_btn.setIcon(QIcon(start_edit_bg_pth))
         start_edit_btn.setIconSize(QSize(200, 60))  # 設置圖標大小，稍小於按鈕尺寸
+        start_edit_btn.setCursor(Qt.PointingHandCursor)  # 滑鼠停滯於按鈕上變成手指形狀[代表可點擊，進行選擇]
         start_edit_btn.clicked.connect(self.parent.show_pool_shape_page)  # 直接進入水池形狀選擇頁面
         
         # 退出按鈕
         exit_btn = QPushButton("")
         exit_btn.setMinimumHeight(60)
         exit_btn.setMinimumWidth(200)
-        exit_btn_bg_pth = r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/ExitButton.png"
+        exit_btn_bg_pth = r"WaterEditTool\UI_Images\ExitButton.png"
+
         # 設置圖標
         exit_btn.setIcon(QIcon(exit_btn_bg_pth))
         exit_btn.setIconSize(QSize(200, 60))  # 設置圖標大小，稍小於按鈕尺寸
-
+        exit_btn.setCursor(Qt.PointingHandCursor)  # 滑鼠停滯於按鈕上變成手指形狀[代表可點擊，進行選擇]
         exit_btn.clicked.connect(self.exit_application)
         
         # 添加按鈕到佈局
@@ -196,8 +199,8 @@ class HomePage(QWidget):
 class PoolShapePage(QWidget):
     '''水池形狀選擇頁面Class'''
 
-    # 添加信號
-    pool_shape_signal = pyqtSignal(str) # 水池形狀選擇信號
+    # 添加訊號
+    pool_shape_signal = pyqtSignal(str) # 水池形狀選擇訊號
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -212,7 +215,7 @@ class PoolShapePage(QWidget):
         palette.setColor(self.backgroundRole(), QColor("#EEFFFE"))  # 設置淺藍背景
         self.setPalette(palette)
 
-        # 設置樣式表(Style Sheet)，確保子元件皆為透明的
+        # 設置Style Sheet，確保子元件皆為透明的
         self.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
@@ -220,6 +223,14 @@ class PoolShapePage(QWidget):
             }
             QLabel {
                 background-color: transparent;
+            }
+            /* 定義 ToolTip 樣式 */
+            QToolTip {
+                border: 1px solid #76797C;
+                background-color: #5A5A5A;
+                color: white;
+                padding: 5px;
+                opacity: 200;
             }
         """)
 
@@ -234,86 +245,94 @@ class PoolShapePage(QWidget):
         top_layout.setSpacing(10)
 
         # 標題
-        title_label = QLabel("Select Pool Shape")
+        title_label = QLabel("First Stage: Select Pool Shape")
+        title_label.setFont(QFont("Arial"))
+        title_label.setAlignment(Qt.AlignCenter)
         title_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft) # 文字內容水平靠左對齊，垂直置中對齊)
-        title_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #000000; background-color: transparent")
+        title_label.setStyleSheet("font-size: 28px; font-weight: bold; color: #000000; background-color: transparent") # 稍微加大標題字體
 
         # 返回首頁按鈕
         home_btn = QPushButton("")
         home_btn.setFixedSize(50,50)
-        home_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/To Home Page Button.png"))
+        home_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\ToHomePageButton.png"))
         home_btn.setIconSize(QSize(40,40))
+        # home_btn.setToolTip("Back to Home Page") # 提示文字內容
+        home_btn.setCursor(Qt.PointingHandCursor) # 滑鼠停滯於按鈕上變成手指形狀[代表可點擊，進行選擇]
         home_btn.clicked.connect(self.parent.show_home_page)
 
         # 添加到頂部佈局
         top_layout.addWidget(title_label,1)
         top_layout.addWidget(home_btn)
 
+        # 創建引導說明文字區域
+        instruction_container = QWidget()
+        instruction_layout = QVBoxLayout(instruction_container)
+        instruction_layout.setContentsMargins(0, 0, 0, 0)
+        instruction_layout.setSpacing(5)
+
+        # 主要引導文字
+        hint_label = QLabel("Please select the geometry of your pool to initialize the calibration process")
+        hint_label.setFont(QFont("Arial"))
+        hint_label.setAlignment(Qt.AlignCenter)
+        hint_label.setStyleSheet("font-size: 24px; font-weight: bold; color: #000000; font-weight: 500;")
+
+        # 次要引導說明文字
+        sub_hint_label = QLabel("Different shapes will correspond to different perspective transformation algorithms")
+        sub_hint_label.setFont(QFont("Arial"))
+        sub_hint_label.setAlignment(Qt.AlignCenter)
+        sub_hint_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #666666;")
+
+        instruction_layout.addWidget(hint_label)
+        instruction_layout.addWidget(sub_hint_label)
+
         # 創建水池形狀選擇按鈕區域
         shape_container = QWidget()
         shape_container.setStyleSheet("background-color: transparent;")
         shape_layout = QHBoxLayout(shape_container)
-        shape_layout.setSpacing(30)
+        shape_layout.setSpacing(50) # 增加按鈕之間的間距，讓畫面更寬敞
 
         # 圓形水池按鈕
         circle_btn = QPushButton("")
-        circle_btn.setMinimumHeight(80)
-        circle_btn.setMinimumWidth(200)
-        circle_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/CirclePoolButton.png"))
-        circle_btn.setIconSize(QSize(200, 80))
+        circle_btn.setMinimumHeight(100)
+        circle_btn.setMinimumWidth(220)
+        circle_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\CirclePoolButton.png"))
+        circle_btn.setIconSize(QSize(360, 360))
+        # ToolTip 提示
+        circle_btn.setToolTip("Select <b>Circle Pool Button</b> if your pool is round")
+        circle_btn.setCursor(Qt.PointingHandCursor) # 滑鼠停滯於按鈕上變成手指形狀[代表可點擊，進行選擇]
         circle_btn.clicked.connect(lambda: self.select_pool_shape("circle"))
         
         # 矩形水池按鈕
         rectangle_btn = QPushButton("")
-        rectangle_btn.setMinimumHeight(80)
-        rectangle_btn.setMinimumWidth(200)
-        rectangle_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/RectanglePoolButton.png"))
-        rectangle_btn.setIconSize(QSize(200, 80))
+        rectangle_btn.setMinimumHeight(100)
+        rectangle_btn.setMinimumWidth(220)
+        rectangle_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\RectanglePoolButton.png"))
+        rectangle_btn.setIconSize(QSize(360, 360))
+        # ToolTip 提示
+        rectangle_btn.setToolTip("Select <b>Rectangle Pool Button</b> if your pool is square or rectangular")
+        rectangle_btn.setCursor(Qt.PointingHandCursor) # 滑鼠停滯於按鈕上變成手指形狀[代表可點擊，進行選擇]
         rectangle_btn.clicked.connect(lambda: self.select_pool_shape("rectangle"))
         
-        # 橢圓形水池按鈕
-        # oval_btn = QPushButton("")
-        # oval_btn.setMinimumHeight(80)
-        # oval_btn.setMinimumWidth(200)
-        # oval_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/OvalPoolButton.png"))
-        # oval_btn.setIconSize(QSize(200, 80))
-        # oval_btn.setStyleSheet("background-color: transparent; border: none;")
-        # oval_btn.clicked.connect(lambda: self.select_pool_shape("oval"))
-        
         # 添加按鈕到形狀選擇佈局
+        shape_layout.addStretch(1) # 左側彈性空間
         shape_layout.addWidget(circle_btn)
         shape_layout.addWidget(rectangle_btn)
-        # shape_layout.addWidget(oval_btn)
+        shape_layout.addStretch(1) # 右側彈性空間
         
-        # 創建一個容器來放置按鈕，並將其置於中央
-        button_container = QWidget()
-        container_layout = QHBoxLayout(button_container)
-        container_layout.addStretch(1)  # 左側彈性空間
-        container_layout.addWidget(shape_container)  # 按鈕框架
-        container_layout.addStretch(1)  # 右側彈性空間
-        
-        # 創建底部導航按鈕區域
+        # 創建底部按鈕區域
         bottom_nav_layout = QHBoxLayout()
         bottom_nav_layout.setContentsMargins(20, 0, 20, 20)
         bottom_nav_layout.setSpacing(10)
-
-        # 上一步按鈕
-        prev_btn = QPushButton("")
-        prev_btn.setFixedSize(180, 50)
-        prev_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/PreviousStep.png"))
-        prev_btn.setIconSize(QSize(180, 50))
-        prev_btn.setStyleSheet("background-color: transparent; border: none;")
-        prev_btn.clicked.connect(self.parent.show_home_page)
-        
-        # 添加按鈕到底部佈局
-        bottom_nav_layout.addWidget(prev_btn)
-        bottom_nav_layout.addStretch(1)  # 中間彈性空間
         
         # 添加所有元素到主佈局
         main_layout.addLayout(top_layout)
-        main_layout.addStretch(1)  # 上方彈性空間
-        main_layout.addWidget(button_container)  # 形狀選擇按鈕
-        main_layout.addStretch(1)  # 下方彈性空間
+        
+        main_layout.addStretch(1)       # 上方彈性空間
+        main_layout.addWidget(instruction_container) # 加入引導文字
+        main_layout.addSpacing(30)      # 文字與按鈕間的固定距離
+        main_layout.addWidget(shape_container)  # 形狀選擇按鈕
+        main_layout.addStretch(2)       # 下方彈性空間
+        
         main_layout.addLayout(bottom_nav_layout)
         
         # 設置主佈局
@@ -336,7 +355,7 @@ class PerspectiveCalibrationPage(QWidget):
     """透視變換編輯頁面Class"""
     
     # 添加信號
-    annotation_points_signal = pyqtSignal(list)  # 標註點信號
+    annotation_points_signal = pyqtSignal(list)  # 標註點訊號
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -350,13 +369,13 @@ class PerspectiveCalibrationPage(QWidget):
     
     def init_ui(self):
         """初始化UI"""
-        # 設置整個頁面的背景色為淺藍色
-        self.setAutoFillBackground(True)  # 確保背景自動填充
+        # 設置背景色
+        self.setAutoFillBackground(True)
         palette = self.palette()
-        palette.setColor(self.backgroundRole(), QColor("#EEFFFE"))  # 設置淺藍背景
+        palette.setColor(self.backgroundRole(), QColor("#EEFFFE"))
         self.setPalette(palette)
         
-        # 設置樣式表，確保所有子元件都是透明的
+        # 設置通用樣式表
         self.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
@@ -364,174 +383,293 @@ class PerspectiveCalibrationPage(QWidget):
             }
             QLabel {
                 background-color: transparent;
+                color: #333333;
             }
-            QWidget#sendBtnContainer {
-                background-color: transparent;
+            
+            /* --- 步驟指引的樣式邏輯 --- */
+            
+            /* 1. 尚未執行的步驟 (Pending) - 灰色文字 */
+            QLabel.step-label {
+                font-size: 16px;
+                font-weight: bold;
+                color: #AAAAAA; /* 較淺的灰色，代表還沒輪到 */
+                padding: 5px;
+            }
+            
+            /* 2. 當前步驟 (Active) - 綠色文字 + 強調背景 */
+            QLabel.step-active {
+                font-size: 18px;
+                font-weight: bold;
+                color: #2E7D32; /* 深綠色文字，清晰易讀 */
+                background-color: #E8F5E9; /* 極淺的綠色背景，增加層次感 */
+                border: 2px solid #4CAF50; /* 綠色邊框 */
+                border-radius: 5px; /* 圓角 */
+                padding: 8px; /* 增加內距讓文字不要貼邊 */
+            }
+            
+            /* 3. 已完成 (Done) - 灰色文字 + 刪除線 */
+            QLabel.step-done {
+                font-size: 16px;
+                font-weight: bold;         
+                color: #888888; /* 深灰色 */
+                text-decoration: line-through; /* 關鍵：刪除線 */
+                padding: 5px;
             }
         """)
         
-        # 創建主佈局
+        # === 主佈局 ===
         main_layout = QVBoxLayout()
-        # 設置邊距為0，確保佈局填滿整個窗口
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # 創建頂部區域 (包含標題和首頁按鈕)
+        # === 頂部區域 ===
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(20, 20, 20, 10)
-        top_layout.setSpacing(10)
-
-        # 標題
-        self.title_label = QLabel(f"Click on the image to set the reference point(Select {self.max_points} points)")
-        self.title_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        self.title_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #000000; background-color: transparent;")
         
-        # 首頁按鈕
+        # 標題
+        self.title_label = QLabel("")
+        self.title_label.setFont(QFont("Arial")) # 設置標題的字型
+        self.title_label.setStyleSheet("font-size: 28px; font-weight: bold; color: #2D2D30;")
+
+        # 返回首頁按鈕
         home_btn = QPushButton("")
         home_btn.setFixedSize(50, 50)
-        home_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/To Home Page Button.png"))
+        home_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\ToHomePageButton.png"))
         home_btn.setIconSize(QSize(40, 40))
-        home_btn.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                border: none;
-            }
-            QPushButton:hover {
-                background-color: rgba(200, 200, 200, 100);
-                border-radius: 25px;
-            }
-        """)
+        home_btn.setCursor(Qt.PointingHandCursor) # 滑鼠停滯於按鈕上變成手指形狀[代表可點擊，進行選擇]
         home_btn.clicked.connect(self.parent.show_home_page)
         
-        # 添加到頂部佈局
+        # 將標題和返回按鈕添加到頂部區域
         top_layout.addWidget(self.title_label, 1)
         top_layout.addWidget(home_btn)
         
-        # 創建中間內容區域 (包含圖像和按鈕)
-        content_layout = QVBoxLayout()
-        content_layout.setContentsMargins(20, 10, 20, 20)
-        content_layout.setSpacing(15)
+        # === 中間內容區域 ===
+        content_container = QWidget()
+        content_layout = QHBoxLayout(content_container)
+        content_layout.setContentsMargins(20, 10, 20, 10)
+        content_layout.setSpacing(20)
         
-        # 創建圖像顯示區域
+        # 左側：圖片顯示區
+        image_container = QWidget()
+        image_layout = QVBoxLayout(image_container)
+        image_layout.setContentsMargins(0,0,0,0)
+        
         self.image_frame = QLabel()
         self.image_frame.setAlignment(Qt.AlignCenter)
-        self.image_frame.setStyleSheet("background-color: transparent;")
+
+        # 設定圖框樣式
+        # 背景顏色:透明；邊框寬度:2px；邊框圓角:10px；邊框樣式:虛線；邊框顏色:#CCCCCC(淺灰色)
+        self.image_frame.setStyleSheet("background-color: transparent; border-radius: 10px; border: 2px dashed #CCCCCC;")
         self.image_frame.setMinimumSize(640, 480)
+        self.image_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.image_frame.mousePressEvent = self.on_image_click
-        
-        mid_btn_container = QWidget()
-        mid_btn_layout = QHBoxLayout(mid_btn_container)
-        mid_btn_layout.setContentsMargins(0, 0, 0, 0)
-        mid_btn_layout.setSpacing(20)  # 設置按鈕之間的間距
 
-        # 擷取當前幀按鈕
-        capture_btn = QPushButton("")
-        capture_btn.setFixedSize(180, 40)
-        capture_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/CaptureImage.png"))
-        capture_btn.setIconSize(QSize(180, 40))
-        capture_btn.setStyleSheet("background-color: transparent; border: none;")
-        capture_btn.clicked.connect(self.capture_current_frame)
+        image_content = QLabel("Camera stream image of the current frame")
+        image_content.setFont(QFont("Arial"))
+        image_content.setAlignment(Qt.AlignCenter)
+        image_content.setStyleSheet("font-size: 18px; font-weight: bold; color: #2D2D30; margin-bottom: 5px;")
         
+        image_layout.addWidget(self.image_frame)
+        image_layout.addWidget(image_content)
+        
+        # 右側：操作指引與按鈕
+        control_panel = QFrame()
+        control_panel.setFixedWidth(400) # 固定右側面板寬度
+        control_panel.setStyleSheet("background-color: rgba(255,255,255,0.7); border-radius: 15px;") # 稍微增加不透明度
+        control_layout = QVBoxLayout(control_panel)
+        control_layout.setContentsMargins(20, 30, 20, 30)
+        control_layout.setSpacing(15)
+        
+        # 標題
+        panel_title = QLabel("Setup Guide")
+        panel_title.setFont(QFont("Arial")) # 設置標題的字型
+        # margin-bottom: 10px 添加10像素的間隔
+        panel_title.setStyleSheet("font-size: 24px; font-weight: bold; color: #2D2D30; margin-bottom: 10px;")
+        control_layout.addWidget(panel_title)
+
+        # 步驟 1 指引
+        self.step1_label = QLabel("Step 1: Capture the current frame\nfrom the camera stream")
+        self.step1_label.setFont(QFont("Arial"))
+        self.step1_label.setProperty("class", "step-label")
+        control_layout.addWidget(self.step1_label)
+
+        # 擷取按鈕 (Capture)
+        self.capture_btn = QPushButton("")
+        self.capture_btn.setFixedSize(180, 40)
+        self.capture_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\CaptureFrame.png"))
+        self.capture_btn.setIconSize(QSize(180, 40))
+        self.capture_btn.setStyleSheet("background-color: transparent; border: none;")
+        self.capture_btn.setCursor(Qt.PointingHandCursor)
+        self.capture_btn.clicked.connect(self.capture_current_frame)
+        control_layout.addWidget(self.capture_btn, 0, Qt.AlignCenter)
+
+        # 分隔線
+        line1 = QFrame()
+        line1.setFrameShape(QFrame.HLine)
+        line1.setFrameShadow(QFrame.Plain)
+        line1.setFixedHeight(1)             
+        line1.setStyleSheet("background-color: #888888;")
+        control_layout.addWidget(line1)
+
+        # 步驟 2 指引
+        self.step2_label = QLabel(f"Step 2: Select {self.max_points} reference points\nin the image on the left")
+        self.step2_label.setFont(QFont("Arial"))
+        self.step2_label.setProperty("class", "step-label")
+        control_layout.addWidget(self.step2_label)
+        
+        # 點數計數器
+        self.points_counter = QLabel("Points: 0 / 4")
+        self.points_counter.setFont(QFont("Arial"))
+        self.points_counter.setAlignment(Qt.AlignCenter)
+        self.points_counter.setStyleSheet("font-size: 24px; font-weight: bold; color: #555555; margin: 10px 0;")
+        control_layout.addWidget(self.points_counter)
+
         # 重置按鈕
-        reset_btn = QPushButton("")
-        reset_btn.setFixedSize(180, 40)
-        reset_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/Reset.png"))
-        reset_btn.setIconSize(QSize(180, 40))
-        reset_btn.setStyleSheet("background-color: transparent; border: none;")
-        reset_btn.clicked.connect(self.reset_annotations)
+        self.reset_btn = QPushButton("")
+        self.reset_btn.setFixedSize(180, 40)
+        self.reset_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\ResetPoints.png"))
+        self.reset_btn.setIconSize(QSize(180, 40))
+        self.reset_btn.setStyleSheet("background-color: transparent; border: none;")
+        self.reset_btn.setCursor(Qt.PointingHandCursor)
+        self.reset_btn.clicked.connect(self.reset_annotations)
+        control_layout.addWidget(self.reset_btn, 0, Qt.AlignCenter)
 
-        # 添加按鈕到中間佈局
-        mid_btn_layout.addStretch(1)  # 左側彈性空間
-        mid_btn_layout.addWidget(capture_btn)
-        mid_btn_layout.addWidget(reset_btn)
-        mid_btn_layout.addStretch(1)  # 右側彈性空間
-        
-        # 發送按鈕
-        send_btn_container = QWidget()
-        send_btn_container.setObjectName("sendBtnContainer")  # 設置對象名稱以便在樣式表中引用
-        send_btn_container.setStyleSheet("background-color: transparent;")
-        send_layout = QHBoxLayout(send_btn_container)
-        send_layout.setContentsMargins(0, 0, 0, 0)
-        
-        send_btn = QPushButton("")
-        send_btn.setFixedSize(350, 50)
-        send_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/ApplyPoints.png"))
-        send_btn.setIconSize(QSize(300, 50))
-        send_btn.setStyleSheet("background-color: transparent; border: none;")
-        send_btn.clicked.connect(self.send_annotations)
-        
-        send_layout.addStretch(1)
-        send_layout.addWidget(send_btn)
-        send_layout.addStretch(1)
+        # 分隔線
+        line2 = QFrame()
+        line2.setFrameShape(QFrame.HLine)
+        line2.setFrameShadow(QFrame.Plain)
+        line2.setFixedHeight(1)             
+        line2.setStyleSheet("background-color: #888888;")
+        control_layout.addWidget(line2)
 
-        # 創建底部導航按鈕區域
+        # 步驟 3 指引
+        self.step3_label = QLabel("Step 3: Set reference points\nfor perspective transformation")
+        self.step3_label.setFont(QFont("Arial"))
+        self.step3_label.setProperty("class", "step-label")
+        control_layout.addWidget(self.step3_label)
+
+        # 確認按鈕 (Confirm)
+        self.confirm_btn = QPushButton("")
+        self.confirm_btn.setFixedSize(180, 40)
+        self.confirm_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\SetPoints.png"))
+        self.confirm_btn.setIconSize(QSize(180, 40))
+        self.confirm_btn.setStyleSheet("background-color: transparent; border: none;")
+        self.confirm_btn.setCursor(Qt.PointingHandCursor)
+        self.confirm_btn.clicked.connect(self.send_annotations)
+        self.confirm_btn.setEnabled(False) # 初始禁用
+        control_layout.addWidget(self.confirm_btn, 0, Qt.AlignCenter)
+        
+        control_layout.addStretch(1) # 底部彈性空間
+
+        # 將左右區域加入 content layout
+        content_layout.addWidget(image_container, 1)
+        content_layout.addWidget(control_panel)
+
+        # --- 3. 底部按鈕區域 ---
         bottom_nav_layout = QHBoxLayout()
         bottom_nav_layout.setContentsMargins(20, 0, 20, 20)
-        bottom_nav_layout.setSpacing(10)
-
-        # 上一步按鈕
+        
         prev_btn = QPushButton("")
         prev_btn.setFixedSize(180, 50)
-        prev_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/PreviousStep.png"))
+        prev_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\PreviousStep.png"))
         prev_btn.setIconSize(QSize(180, 50))
-        prev_btn.setStyleSheet("background-color: transparent; border: none;")
+        prev_btn.setCursor(Qt.PointingHandCursor)
         prev_btn.clicked.connect(self.parent.show_pool_shape_page)
-
-        # 下一步按鈕
+        
         next_btn = QPushButton("")
         next_btn.setFixedSize(180, 50)
-        next_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/NextStep.png"))
+        next_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\NextStep.png"))
         next_btn.setIconSize(QSize(180, 50))
-        next_btn.setStyleSheet("background-color: transparent; border: none;")
+        next_btn.setCursor(Qt.PointingHandCursor)
         next_btn.clicked.connect(self.go_to_next_step)
         
-        # 添加按鈕到底部佈局
         bottom_nav_layout.addWidget(prev_btn)
-        bottom_nav_layout.addStretch(1)  # 中間彈性空間
+        bottom_nav_layout.addStretch(1)
         bottom_nav_layout.addWidget(next_btn)
-        
-        # 添加元素到內容佈局
-        content_layout.addWidget(self.image_frame, 1)
-        content_layout.addWidget(mid_btn_container)
-        content_layout.addWidget(send_btn_container)
-        content_layout.addLayout(bottom_nav_layout)
-        
-        # 添加所有元素到主佈局
-        main_layout.addLayout(top_layout)
-        main_layout.addLayout(content_layout, 1)  # 添加伸展因子，確保內容區域可以填滿剩餘空間
 
-        # 設置主佈局
+        # 添加到主佈局
+        main_layout.addLayout(top_layout)
+        main_layout.addWidget(content_container, 1) # 中間內容
+        main_layout.addLayout(bottom_nav_layout)
+        
         self.setLayout(main_layout)
         
-        # 創建定時器，用於更新圖像
+        # 初始化指引狀態
+        self.update_step_status(1)
+        
+        # Timer
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(30)  # 每30毫秒更新一次
+        self.timer.start(30)
+
+    def update_step_status(self, step):
+        """更新步驟指引的Highlight狀態 (綠色/灰色/刪除線)"""
+        # 重置所有標籤為預設狀態
+        self.step1_label.setProperty("class", "step-label")
+        self.step2_label.setProperty("class", "step-label")
+        self.step3_label.setProperty("class", "step-label")
+        
+        # 根據當前步驟設置狀態
+        if step == 1:
+            # Step 1: 進行中 (Active)
+            self.step1_label.setProperty("class", "step-active")
+            # Step 2, 3: 未開始 (Pending)
+        elif step == 2:
+            # Step 1: 已完成 (Done)
+            self.step1_label.setProperty("class", "step-done")
+            # Step 2: 進行中 (Active)
+            self.step2_label.setProperty("class", "step-active")
+            # Step 3: 未開始 (Pending)
+        elif step == 3:
+            # Step 1, 2: 已完成 (Done)
+            self.step1_label.setProperty("class", "step-done")
+            self.step2_label.setProperty("class", "step-done")
+            # Step 3: 進行中 (Active)
+            self.step3_label.setProperty("class", "step-active")
+            
+        # 強制刷新樣式 (需要此步驟來應用動態屬性的變化)
+        self.style().unpolish(self.step1_label)
+        self.style().polish(self.step1_label)
+        self.style().unpolish(self.step2_label)
+        self.style().polish(self.step2_label)
+        self.style().unpolish(self.step3_label)
+        self.style().polish(self.step3_label)
 
     def update_for_pool_shape(self,shape):
-        '''根據在水池形狀選擇頁面選擇的結果更新標題內容'''
+        '''根據在水池形狀選擇頁面選擇的結果更新'''
         self.pool_shape = shape
-        self.title_label.setText(f"[Pool Shape:{shape}]Click on the image to set the reference point(Select {self.max_points} points)")
+        self.title_label.setText(f"Second Stage: Perspective transformation reference points edit for {self.pool_shape} pool")
     
     def update_camera_frame(self, frame):
         """從攝像頭更新幀"""
         if frame is not None:
             self.current_frame = frame.copy()
-            # 如果尚未擷取幀，則顯示預覽
+            # 如果尚未擷取幀，顯示預覽提示
             if not self.is_frame_captured:
-                # 創建一個預覽幀，添加提示文字
                 preview_frame = self.current_frame.copy()
-                cv2.putText(preview_frame, "預覽 - 請點擊「Capture image」按鈕", 
-                          (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                # 增加半透明遮罩讓文字更清楚
+                overlay = preview_frame.copy()
+                cv2.rectangle(overlay, (0, 0), (preview_frame.shape[1], 60), (0,0,0), -1)
+                cv2.addWeighted(overlay, 0.5, preview_frame, 0.5, 0, preview_frame)
+                
+                cv2.putText(preview_frame, "Preview Mode - Click 'Capture' to start", 
+                          (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                 self.display_frame = preview_frame
     
     def capture_current_frame(self):
         """擷取當前幀"""
-        print("按下截取當前Frame按鈕")
+        print("按下 Capture 按鈕")
         if self.current_frame is not None:
             self.display_frame = self.current_frame.copy()
             self.is_frame_captured = True
-            self.annotation_points = []  # 重置標註點
+            self.annotation_points = []
+            
+            # 更新UI狀態 -> 進入步驟 2
+            self.update_step_status(2) 
+            self.points_counter.setText(f"Points: 0 / {self.max_points}")
+            self.points_counter.setStyleSheet("font-size: 24px; font-weight: bold; color: #888888; margin: 10px 0;") # 點數文字變深灰色
+            self.image_frame.setStyleSheet("background-color: transparent; border-radius: 10px; border: 2px dashed #4CAF50;") # 邊框變綠表示已鎖定
+            
             print("已擷取當前幀，可以開始標註參考點")
     
     def update_frame_from_camera(self, frame):
@@ -540,134 +678,127 @@ class PerspectiveCalibrationPage(QWidget):
             self.current_frame = frame.copy()
     
     def update_frame(self):
-        """更新圖像幀"""
-        # 如果沒有幀可顯示，使用空白圖像
+        """更新圖像幀到 UI"""
         if self.display_frame is None:
             blank_frame = np.zeros((480, 640, 3), dtype=np.uint8)
-            blank_frame[:] = (245, 245, 240)  # 淺米色
+            blank_frame[:] = (245, 245, 240)
+            cv2.putText(blank_frame, "Waiting for Camera...", (50, 240), cv2.FONT_HERSHEY_SIMPLEX, 1, (100,100,100), 2)
             self.display_frame = blank_frame
         
-        # 繪製標註點
         frame_with_annotations = self.display_frame.copy()
+        
+        # 繪製標註點
         for i, point in enumerate(self.annotation_points):
+            # 畫圓圈
             cv2.circle(frame_with_annotations, point, 5, (0, 0, 255), -1)
+            # 標註點編號文字
             cv2.putText(frame_with_annotations, f"P{i+1}", 
                       (point[0] + 10, point[1] + 10), 
                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         
-        # 提高顯示品質：使用更高質量的圖像轉換
+        # 圖像縮放與顯示
         display_height = self.image_frame.height()
         display_width = self.image_frame.width()
-        
-        # 計算保持比例的縮放尺寸
         h, w = frame_with_annotations.shape[:2]
+        if h == 0 or w == 0: return
+
         aspect_ratio = w / h
-        
         if display_width / display_height > aspect_ratio:
-            # 顯示區域更寬，以高度為準
             new_height = display_height
             new_width = int(new_height * aspect_ratio)
         else:
-            # 顯示區域更高，以寬度為準
             new_width = display_width
             new_height = int(new_width / aspect_ratio)
         
-        # 使用 OpenCV 的高質量插值方法進行縮放
-        resized_frame = cv2.resize(frame_with_annotations, (new_width, new_height), 
-                                 interpolation=cv2.INTER_LANCZOS4)
-        
-        # 將OpenCV圖像轉換為Qt圖像
-        height, width, channel = resized_frame.shape
-        bytes_per_line = 3 * width
-        q_img = QImage(resized_frame.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
-        
-        # 顯示圖像（不需要再次縮放）
-        pixmap = QPixmap.fromImage(q_img)
-        self.image_frame.setPixmap(pixmap)
+        if new_width > 0 and new_height > 0:
+            resized_frame = cv2.resize(frame_with_annotations, (new_width, new_height), 
+                                     interpolation=cv2.INTER_LANCZOS4)
+            height, width, channel = resized_frame.shape
+            bytes_per_line = 3 * width
+            q_img = QImage(resized_frame.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
+            self.image_frame.setPixmap(QPixmap.fromImage(q_img))
     
     def on_image_click(self, event):
         """處理圖像點擊事件"""
-         # 如果尚未擷取幀，則不允許標註
         if not self.is_frame_captured:
-            print("請先擷取當前幀，再進行標註")
+            print("請先點擊 Capture")
             return
         
         if len(self.annotation_points) >= self.max_points:
-            print(f"已達到最大標註點數量: {self.max_points}")
             return
         
-        # 獲取點擊位置
         pos = event.pos()
-        
-        # 將點擊位置轉換為圖像坐標
         pixmap = self.image_frame.pixmap()
         if pixmap:
-            # 計算圖像在標籤中的位置
             img_rect = QRect(0, 0, pixmap.width(), pixmap.height())
             img_rect.moveCenter(QPoint(self.image_frame.width() // 2, self.image_frame.height() // 2))
             
-            # 檢查點擊是否在圖像內
             if img_rect.contains(pos):
-                # 計算相對於圖像左上角的坐標
                 x = pos.x() - img_rect.left()
                 y = pos.y() - img_rect.top()
-                
-                # 轉換為原始圖像坐標
                 orig_x = int(x * (self.current_frame.shape[1] / pixmap.width()))
                 orig_y = int(y * (self.current_frame.shape[0] / pixmap.height()))
                 
-                # 添加標註點
                 self.annotation_points.append((orig_x, orig_y))
-                print(f"添加標註點: ({orig_x}, {orig_y}), 當前點數: {len(self.annotation_points)}")
+                
+                # 更新計數器UI
+                count = len(self.annotation_points)
+                self.points_counter.setText(f"Points: {count} / {self.max_points}")
+                
+                # 檢查是否完成
+                if count == self.max_points:
+                    self.update_step_status(3) # 進入步驟 3
+                    self.confirm_btn.setEnabled(True)
+                    self.confirm_btn.setStyleSheet(self.confirm_btn.styleSheet().replace("background-color: #BDBDBD;", ""))
     
     def reset_annotations(self):
         """重置標註點"""
         self.annotation_points = []
+        self.points_counter.setText(f"Points: 0 / {self.max_points}")
+        self.points_counter.setStyleSheet("font-size: 24px; font-weight: bold; color: #888888; margin: 10px 0;")
+        self.update_step_status(2) # 回到步驟 2
+        self.confirm_btn.setEnabled(False)
         print("已重置所有標註點")
     
     def send_annotations(self):
         """發送標註點"""
         if len(self.annotation_points) != self.max_points:
-            print(f"標註點數量不足，需要 {self.max_points} 個點，當前有 {len(self.annotation_points)} 個點")
             return
         
         print(f"發送標註點: {self.annotation_points}")
-        # 發送標註點信號
         self.annotation_points_signal.emit(self.annotation_points)
-        
-        # 發送後重置標註點
         self.reset_annotations()
         self.is_frame_captured = False
+        self.update_step_status(1) # 重置回步驟 1
+        self.image_frame.setStyleSheet("background-color: rgba(0,0,0,0.05); border-radius: 10px; border: 2px dashed #CCCCCC;")
         
-        # 發送後自動進入下一步
         self.go_to_next_step()
     
     def go_to_next_step(self):
-        """進入下一步 (射水向量校準頁面)"""
+        """進入下一步"""
         self.parent.show_water_jet_page()
     
     def reset_ui_display(self):
-        """重置透視變換編輯介面中的UI顯示畫面"""
+        """重置UI顯示"""
         self.annotation_points = []
         self.current_frame = None
         self.display_frame = None
         self.is_frame_captured = False
+        self.points_counter.setText(f"Points: 0 / {self.max_points}")
+        self.points_counter.setStyleSheet("font-size: 24px; font-weight: bold; color: #888888; margin: 10px 0;")
+        self.update_step_status(1)
         
-        # 重置圖像顯示
         blank_frame = np.zeros((480, 640, 3), dtype=np.uint8)
-        blank_frame[:] = (245, 245, 240)  # 淺米色
+        blank_frame[:] = (245, 245, 240)
         self.display_frame = blank_frame
-        
-        # 更新顯示
         self.update_frame()
-        print("透視變換頁面UI顯示已重置")
 
 class WaterJetCalibrationPage(QWidget):
     """射水向量校準頁面Class"""
     
-    # 添加信號
-    water_jet_vectors_signal = pyqtSignal(list)  # 射水向量信號
-    request_transformed_frame_signal = pyqtSignal()  # 請求透視變換後的幀信號
+    # 添加訊號
+    water_jet_vectors_signal = pyqtSignal(list)  # 射水向量訊號
+    request_transformed_frame_signal = pyqtSignal()  # 請求透視變換後的幀訊號
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -681,7 +812,7 @@ class WaterJetCalibrationPage(QWidget):
 
         # 用於繪製射水向量的變數
         self.is_drawing = False # 是否正在繪製射水向量
-        self.current_strat_point = None # 當前繪製的射水向量起點
+        self.current_start_point = None # 當前繪製的射水向量起點
         self.current_end_point = None # 當前繪製的射水向量終點
         self.temp_display_frame = None # 臨時顯示Frame，用於繪製拖曳過程中的向量
         self.init_ui()
@@ -695,7 +826,7 @@ class WaterJetCalibrationPage(QWidget):
         palette.setColor(self.backgroundRole(),QColor("#EEFFFE")) # 淺藍背景
         self.setPalette(palette)
 
-        # 設置樣式表(Style Sheet)，確保子元件皆為透明的
+        # 設置StyleSheet
         self.setStyleSheet("""
             QPushButton {
                 background-color: transparent;
@@ -704,6 +835,35 @@ class WaterJetCalibrationPage(QWidget):
             QLabel {
                 background-color: transparent;
             }
+            /* --- 步驟指引的樣式邏輯 --- */
+            
+            /* 1. 尚未執行的步驟 (Pending) - 灰色文字 */
+            QLabel.step-label {
+                font-size: 16px;
+                font-weight: bold;
+                color: #AAAAAA;
+                padding: 5px;
+            }
+            
+            /* 2. 當前步驟 (Active) - 綠色文字 + 強調背景 */
+            QLabel.step-active {
+                font-size: 18px;
+                font-weight: bold;
+                color: #2E7D32; /* 深綠色 */
+                background-color: #E8F5E9; /* 淺綠背景 */
+                border: 2px solid #4CAF50; /* 綠色邊框 */
+                border-radius: 5px;
+                padding: 8px;
+            }
+            
+            /* 3. 已完成 (Done) - 灰色文字 + 刪除線 */
+            QLabel.step-done {
+                font-size: 16px;
+                font-weight: bold;         
+                color: #888888;
+                text-decoration: line-through;
+                padding: 5px;
+            }
         """)
 
         # 創建主佈局
@@ -711,151 +871,202 @@ class WaterJetCalibrationPage(QWidget):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # 創建頂部區域(標題文字內容、返回首頁按鈕)
+        # === 頂部區域 ===
         top_layout = QHBoxLayout() # 水平佈局
         top_layout.setContentsMargins(20,20,20,10)
         top_layout.setSpacing(10)
          
         # 標題
-        title_label = QLabel("Water Jet Calibration Page")
-        title_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft) # 文字內容水平靠左對齊，垂直置中對齊)
-        title_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #000000; background-color: transparent")
+        title_label = QLabel("Final Stage: Water jet vectors editing")
+        title_label.setFont(QFont("Arial"))
+        title_label.setStyleSheet("font-size: 28px; font-weight: bold; color: #2D2D30;")
 
         # 返回首頁按鈕
         home_btn = QPushButton("")
         home_btn.setFixedSize(50,50)
-        home_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/To Home Page Button.png"))
+        home_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\ToHomePageButton.png"))
         home_btn.setIconSize(QSize(40,40))
+        home_btn.setCursor(Qt.PointingHandCursor) # 滑鼠停滯於按鈕上變成手指形狀[代表可點擊，進行選擇]
         home_btn.clicked.connect(self.parent.show_home_page)
 
-        # 添加到頂部佈局
         top_layout.addWidget(title_label,1)
         top_layout.addWidget(home_btn)
 
-        # 創建中央內容區域(包含圖像以及按鈕)
-        central_layout = QHBoxLayout() # 設置垂直佈局
-        central_layout.setContentsMargins(20,10,20,20) # 設置佈局邊距
-        central_layout.setSpacing(15) # 設置Layout中各元件的間距(預設為10)
+        # === 中央內容區域 (左:編輯圖 / 中:使用者操作指引 / 右:結果圖) ===
+        central_container = QWidget()
+        central_layout = QHBoxLayout(central_container)
+        central_layout.setContentsMargins(20, 10, 20, 10)
+        central_layout.setSpacing(20)
 
-        # 創建左側射水向量編輯區域
-        left_panel = QVBoxLayout() # 設置為垂直佈局
-        left_panel.setSpacing(15)
-
-        # 創建圖像顯示區域(顯示透視變換後的Frame)
+        # [左側] 圖像顯示區域 (顯示透視變換後的Frame)
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+        left_layout.setContentsMargins(0,0,0,0)
+        
         self.image_frame = QLabel()
         self.image_frame.setAlignment(Qt.AlignCenter)
-        self.image_frame.setStyleSheet("background-color: transparent;")
-        self.image_frame.setMinimumSize(512, 512)
+
+        # 初始虛線邊框
+        self.image_frame.setStyleSheet("background-color: rgba(0,0,0,0.05); border-radius: 10px; border: 2px dashed #CCCCCC;")
+        self.image_frame.setMinimumSize(512, 512) # 固定大小
         
-        # 滑鼠事件處理(新方法:類似小畫家畫筆功能，用拖曳的方式進行)
-        self.image_frame.mousePressEvent = self.on_mouse_press # 滑鼠點擊事件(用於設置射水向量初始點)
-        self.image_frame.mouseMoveEvent = self.on_mouse_move # 滑鼠拖曳事件
-        self.image_frame.mouseReleaseEvent = self.on_mouse_release # 滑鼠點擊後釋放事件(用於設置射水向量終點)
+        # 滑鼠事件綁定
+        self.image_frame.mousePressEvent = self.on_mouse_press
+        self.image_frame.mouseMoveEvent = self.on_mouse_move
+        self.image_frame.mouseReleaseEvent = self.on_mouse_release
         
-
-        mid_btn_container = QWidget() # 建立容納中央控制按鈕的容器
-        mid_btn_layout = QHBoxLayout(mid_btn_container) # 設置為水平佈局
-        mid_btn_layout.setContentsMargins(0,0,0,0) # 設置佈局邊距(按鈕緊密排列)
-        mid_btn_layout.setSpacing(20) # 設置按鈕之間的間距
+        left_label = QLabel("Streaming image after perspective transformation")
+        left_label.setFont(QFont("Arial"))
+        left_label.setAlignment(Qt.AlignCenter)
+        left_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #2D2D30;")
         
-        # 截取透視變換後的Frame按鈕
-        capture_btn = QPushButton("")
-        capture_btn.setFixedSize(180,40)
-        capture_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/CaptureImage.png"))
-        capture_btn.setIconSize(QSize(180, 40))
-        capture_btn.setStyleSheet("background-color: transparent; border: none;")
-        capture_btn.clicked.connect(self.request_transformed_frame)
-        
-        # 重置編輯的射水向量按鈕
-        reset_btn = QPushButton("")
-        reset_btn.setFixedSize(180, 40)
-        reset_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/Reset.png"))
-        reset_btn.setIconSize(QSize(180, 40))
-        reset_btn.setStyleSheet("background-color: transparent; border: none;")
-        reset_btn.clicked.connect(self.reset_annotations)
+        left_layout.addWidget(self.image_frame)
+        left_layout.addWidget(left_label)
 
-        # 添加截取按鈕以及重置按鈕到中央控制按鈕容器的佈局
-        mid_btn_layout.addStretch(1)  # 左側彈性空間
-        mid_btn_layout.addWidget(capture_btn)
-        mid_btn_layout.addWidget(reset_btn)
-        mid_btn_layout.addStretch(1)  # 右側彈性空間
+        # [中間] 操作指引面板 (Setup Guide)
+        guide_panel = QFrame()
+        guide_panel.setFixedWidth(420) # 固定寬度
+        guide_panel.setStyleSheet("background-color: rgba(255,255,255,0.7); border-radius: 15px;")
+        guide_layout = QVBoxLayout(guide_panel)
+        guide_layout.setContentsMargins(15, 20, 15, 20)
+        guide_layout.setSpacing(10)
 
-        # 發送按鈕
-        send_btn_container = QWidget()
-        send_btn_container.setObjectName("sendBtnContainer")  # 設置對象名稱方便在樣式表(Style Sheet)中引用
-        send_btn_container.setStyleSheet("background-color: transparent;")
-        send_layout = QHBoxLayout(send_btn_container)
-        send_layout.setContentsMargins(0, 0, 0, 0)
-        
-        # 發送按鈕
-        send_btn = QPushButton("")
-        send_btn.setFixedSize(350, 50)
-        send_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/ApplyWaterJetVector.png"))
-        send_btn.setIconSize(QSize(300, 50))
-        send_btn.setStyleSheet("background-color: transparent; border: none;")
-        send_btn.clicked.connect(self.send_annotations)
-        
-        send_layout.addStretch(1)
-        send_layout.addWidget(send_btn)
-        send_layout.addStretch(1)
-        
-        # 創建底部按鈕區域
-        bottom_btn_layout = QHBoxLayout()
-        bottom_btn_layout.setContentsMargins(0,0,0,0)
-        bottom_btn_layout.setSpacing(10)
+        # 操作指引標題
+        guide_title = QLabel("Setup Guide")
+        guide_title.setFont(QFont("Arial"))
+        guide_title.setStyleSheet("font-size: 24px; font-weight: bold; color: #2D2D30; margin-bottom: 5px;")
+        guide_layout.addWidget(guide_title)
 
-        # 上一步按鈕(返回至透視變換參考點編輯頁面)
-        prev_btn = QPushButton("")
-        prev_btn.setFixedSize(180, 50)
-        prev_btn.setIcon(QIcon(r"C:/Users/Li-En_Lai/Desktop/ArUcoMarker_Test/UI_Img/PreviousStep.png"))
-        prev_btn.setIconSize(QSize(180, 50))
-        prev_btn.setStyleSheet("background-color: transparent; border: none;")
-        # 按鈕功能綁定(切換至上個頁面)
-        prev_btn.clicked.connect(self.go_to_previous_step)
+        # Step 1: Capture
+        self.step1_label = QLabel("Step 1: Capture the current frame\nafter perspective transformation")
+        self.step1_label.setFont(QFont("Arial"))
+        self.step1_label.setProperty("class", "step-label")
+        guide_layout.addWidget(self.step1_label)
 
-        # 添加上一步按鈕到底部按鈕部局
-        bottom_btn_layout.addWidget(prev_btn)
-        bottom_btn_layout.addStretch(1)
+        self.capture_btn = QPushButton("")
+        self.capture_btn.setFixedSize(180, 40)
+        self.capture_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\CaptureFrame.png"))
+        self.capture_btn.setIconSize(QSize(180, 40))
+        self.capture_btn.setCursor(Qt.PointingHandCursor)
+        self.capture_btn.clicked.connect(self.request_transformed_frame)
+        guide_layout.addWidget(self.capture_btn, 0, Qt.AlignCenter)
 
-        # 添加元素到左側編輯區域佈局
-        left_panel.addWidget(self.image_frame,1)
-        left_panel.addWidget(mid_btn_container)
-        left_panel.addWidget(send_btn_container)
-        left_panel.addLayout(bottom_btn_layout)
+        # 分隔線 1
+        line1 = QFrame()
+        line1.setFrameShape(QFrame.HLine)
+        line1.setFixedHeight(1)
+        line1.setStyleSheet("background-color: #AAAAAA;")
+        guide_layout.addWidget(line1)
 
-        # 右側顯示區域
-        right_panel = QVBoxLayout()
-        right_panel.setSpacing(15)
+        # Step 2: Draw Vectors
+        self.step2_label = QLabel(f"Step 2: Draw {self.total_groups} water jet vectors\nin the image on the left(Drag & Drop)")
+        self.step2_label.setFont(QFont("Arial"))
+        self.step2_label.setProperty("class", "step-label")
+        guide_layout.addWidget(self.step2_label)
 
-        # 創建用於顯示即時追蹤水面畫面的圖像區域
+        # 向量計數器
+        self.vector_counter = QLabel("Vectors: 0 / 6")
+        self.vector_counter.setFont(QFont("Arial"))
+        self.vector_counter.setAlignment(Qt.AlignCenter)
+        self.vector_counter.setStyleSheet("font-size: 24px; font-weight: bold; color: #888888; margin: 5px 0;")
+        guide_layout.addWidget(self.vector_counter)
+
+        self.reset_btn = QPushButton("")
+        self.reset_btn.setFixedSize(180, 40)
+        self.reset_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\ResetVectors.png"))
+        self.reset_btn.setIconSize(QSize(180, 40))
+        self.reset_btn.setCursor(Qt.PointingHandCursor)
+        self.reset_btn.clicked.connect(self.reset_annotations)
+        guide_layout.addWidget(self.reset_btn, 0, Qt.AlignCenter)
+
+        # 分隔線 2
+        line2 = QFrame()
+        line2.setFrameShape(QFrame.HLine)
+        line2.setFixedHeight(1)
+        line2.setStyleSheet("background-color: #AAAAAA;")
+        guide_layout.addWidget(line2)
+
+        # Step 3: Confirm
+        self.step3_label = QLabel("Step 3: Apply the edited water jet vectors\nand begin tracking")
+        self.step3_label.setFont(QFont("Arial"))
+        self.step3_label.setProperty("class", "step-label")
+        guide_layout.addWidget(self.step3_label)
+
+        self.confirm_btn = QPushButton("")
+        self.confirm_btn.setFixedSize(180, 40)
+        # 這裡假設您有 Apply 的圖片，如果沒有可以使用 ApplyWaterJetVector.png
+        self.confirm_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\ApplyVectors.png")) 
+        self.confirm_btn.setIconSize(QSize(180, 40)) # 調整大小以適應按鈕
+        self.confirm_btn.setCursor(Qt.PointingHandCursor)
+        self.confirm_btn.clicked.connect(self.send_annotations)
+        self.confirm_btn.setEnabled(False) # 初始禁用
+        guide_layout.addWidget(self.confirm_btn, 0, Qt.AlignCenter)
+
+        guide_layout.addStretch(1) # 底部空間
+
+        # [右側] 結果顯示區域 (Tracking + FlowMap)
+        right_panel = QWidget()
+        right_layout = QVBoxLayout(right_panel)
+        right_layout.setContentsMargins(0,0,0,0)
+        right_layout.setSpacing(10)
+
+        # Tracking Display
         self.tracking_display = QLabel()
         self.tracking_display.setAlignment(Qt.AlignCenter)
-        self.tracking_display.setStyleSheet("background-color: transparent;")
+        self.tracking_display.setStyleSheet("background-color: transparent; border-radius: 5px; border: 1px solid #999;")
         self.tracking_display.setMinimumSize(320, 320)
-        # self.tracking_display.setText("Tracking will be displayed here")
+        
+        track_label = QLabel("Real-time Tracking")
+        track_label.setFont(QFont("Arial"))
+        track_label.setAlignment(Qt.AlignCenter)
+        track_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #333;")
 
-        # 創建用於顯示FlowMap圖像區域
+        # FlowMap Display
         self.flowmap_display = QLabel()
         self.flowmap_display.setAlignment(Qt.AlignCenter)
-        self.flowmap_display.setStyleSheet("background-color: transparent;")
+        self.flowmap_display.setStyleSheet("background-color: transparent; border-radius: 5px; border: 1px solid #999;")
         self.flowmap_display.setMinimumSize(320, 320)
-        # self.flowmap_display.setText("FlowMap will be displayed here")
-
-        # 添加元素到右側編輯區域佈局
-        right_panel.addWidget(self.tracking_display, 1)
-        right_panel.addWidget(self.flowmap_display, 1)
-
-        # 將左側和右側面板添加到中央內容佈局
-        central_layout.addLayout(left_panel, 1)  # 左側編輯區域
-        central_layout.addLayout(right_panel, 1)  # 右側顯示區域
         
+        flow_label = QLabel("Generated Flowmap")
+        flow_label.setFont(QFont("Arial"))
+        flow_label.setAlignment(Qt.AlignCenter)
+        flow_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #333;")
+
+        right_layout.addWidget(track_label)
+        right_layout.addWidget(self.tracking_display)
+        right_layout.addWidget(flow_label)
+        right_layout.addWidget(self.flowmap_display)
+        right_layout.addStretch(1)
+
+        # 將三塊區域加入中央佈局
+        central_layout.addWidget(left_panel)
+        central_layout.addWidget(guide_panel)
+        central_layout.addWidget(right_panel)
+
+        # === 底部按鈕區域 (Previous Step) ===
+        bottom_nav_layout = QHBoxLayout()
+        bottom_nav_layout.setContentsMargins(20, 0, 20, 20)
+        
+        prev_btn = QPushButton("")
+        prev_btn.setFixedSize(180, 50)
+        prev_btn.setIcon(QIcon(r"WaterEditTool\UI_Images\PreviousStep.png"))
+        prev_btn.setIconSize(QSize(180, 50))
+        prev_btn.setCursor(Qt.PointingHandCursor)
+        prev_btn.clicked.connect(self.go_to_previous_step)
+        
+        bottom_nav_layout.addWidget(prev_btn)
+        bottom_nav_layout.addStretch(1)
+
         # 添加所有元素到主佈局
         main_layout.addLayout(top_layout)
-        main_layout.addLayout(central_layout,1)
+        main_layout.addWidget(central_container, 1)
+        main_layout.addLayout(bottom_nav_layout)
         
-        # 設置主佈局
         self.setLayout(main_layout)
         
+        # 初始化指引狀態
+        self.update_step_status(1)
+
         # 創建定時器，用於更新圖像
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
@@ -865,6 +1076,32 @@ class WaterJetCalibrationPage(QWidget):
         self.tracking_active = False
         self.tracker = None
     
+    def update_step_status(self, step):
+        """更新步驟指引的Highlight狀態 (綠色/灰色/刪除線)"""
+        # 重置所有標籤
+        self.step1_label.setProperty("class", "step-label")
+        self.step2_label.setProperty("class", "step-label")
+        self.step3_label.setProperty("class", "step-label")
+        
+        # 根據當前步驟設置
+        if step == 1:
+            self.step1_label.setProperty("class", "step-active")
+        elif step == 2:
+            self.step1_label.setProperty("class", "step-done")
+            self.step2_label.setProperty("class", "step-active")
+        elif step == 3:
+            self.step1_label.setProperty("class", "step-done")
+            self.step2_label.setProperty("class", "step-done")
+            self.step3_label.setProperty("class", "step-active")
+            
+        # 刷新樣式
+        self.style().unpolish(self.step1_label)
+        self.style().polish(self.step1_label)
+        self.style().unpolish(self.step2_label)
+        self.style().polish(self.step2_label)
+        self.style().unpolish(self.step3_label)
+        self.style().polish(self.step3_label)
+
     def update_frame_from_camera(self, frame):
         """從攝像頭更新幀"""
         if frame is not None:
@@ -872,19 +1109,36 @@ class WaterJetCalibrationPage(QWidget):
     
     def capture_current_frame(self):
         """擷取當前幀"""
-        print("按下截取當前Frame按鈕")
+        print("按下 Capture 按鈕")
         if self.current_frame is not None:
             self.display_frame = self.current_frame.copy()
             self.is_frame_captured = True
             self.annotation_points = []  # 重置標註點
+            
+            # 更新UI狀態 -> 進入步驟 2
+            self.update_step_status(2)
+            self.vector_counter.setText(f"Vectors: 0 / {self.total_groups}")
+            self.vector_counter.setStyleSheet("font-size: 24px; font-weight: bold; color: #888888; margin: 5px 0;")
+            self.image_frame.setStyleSheet("background-color: transparent; border-radius: 10px; border: 2px solid #4CAF50;") # 綠框
+            
             print("已擷取當前幀，可以開始標註射水向量")
     
+    def request_transformed_frame(self):
+        """請求透視變換後的畫面並擷取當前幀"""
+        print("請求透視變換後的畫面")
+        # 發送請求透視變換後的幀信號
+        self.request_transformed_frame_signal.emit()
+        # 擷取當前幀 (這會觸發 capture_current_frame)
+        self.capture_current_frame()
+
     def update_frame(self):
         """更新圖像幀"""
         # 如果沒有幀可顯示，使用空白圖像
         if self.display_frame is None:
             blank_frame = np.zeros((512, 512, 3), dtype=np.uint8)
             blank_frame[:] = (245, 245, 245)  # 深灰色背景
+            # 顯示等待文字
+            cv2.putText(blank_frame, "Waiting for Capture...", (130, 256), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100,100,100), 2)
             self.display_frame = blank_frame
         
         # 使用臨時顯示幀或正常顯示幀
@@ -913,6 +1167,7 @@ class WaterJetCalibrationPage(QWidget):
                             (start_point[0] + 10, start_point[1] + 10), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             frame_to_display = frame_with_annotations
+
         # 將OpenCV圖像轉換為Qt圖像
         height, width, channel = frame_to_display.shape
         bytes_per_line = 3 * width
@@ -951,9 +1206,13 @@ class WaterJetCalibrationPage(QWidget):
                 x = pos.x() - img_rect.left()
                 y = pos.y() - img_rect.top()
                 
-                # 轉換為原始圖像坐標
-                orig_x = int(x * (self.current_frame.shape[1] / pixmap.width()))
-                orig_y = int(y * (self.current_frame.shape[0] / pixmap.height()))
+                # 轉換為原始圖像坐標 (這裡假設 display_frame 是 512x512 或與 current_frame 比例一致)
+                # 注意：這裡應該用 current_frame 的尺寸來做反投影
+                frame_h, frame_w = self.current_frame.shape[:2]
+                
+                # 簡單的比例換算
+                orig_x = int(x * (frame_w / pixmap.width()))
+                orig_y = int(y * (frame_h / pixmap.height()))
                 
                 # 設置繪製起點
                 self.current_start_point = (orig_x, orig_y)
@@ -962,8 +1221,6 @@ class WaterJetCalibrationPage(QWidget):
                 
                 # 創建臨時顯示幀
                 self.update_temp_display_frame()
-                
-                print(f"開始繪製向量，起點: ({orig_x}, {orig_y})")
 
     def on_mouse_move(self, event):
         """處理滑鼠移動事件"""
@@ -972,23 +1229,18 @@ class WaterJetCalibrationPage(QWidget):
         
         # 獲取當前位置
         pos = event.pos()
-        
-        # 將當前位置轉換為圖像坐標
         pixmap = self.image_frame.pixmap()
         if pixmap:
-            # 計算圖像在標籤中的位置
             img_rect = QRect(0, 0, pixmap.width(), pixmap.height())
             img_rect.moveCenter(QPoint(self.image_frame.width() // 2, self.image_frame.height() // 2))
             
-            # 檢查點擊是否在圖像內
             if img_rect.contains(pos):
-                # 計算相對於圖像左上角的坐標
                 x = pos.x() - img_rect.left()
                 y = pos.y() - img_rect.top()
                 
-                # 轉換為原始圖像坐標
-                orig_x = int(x * (self.current_frame.shape[1] / pixmap.width()))
-                orig_y = int(y * (self.current_frame.shape[0] / pixmap.height()))
+                frame_h, frame_w = self.current_frame.shape[:2]
+                orig_x = int(x * (frame_w / pixmap.width()))
+                orig_y = int(y * (frame_h / pixmap.height()))
                 
                 # 更新終點
                 self.current_end_point = (orig_x, orig_y)
@@ -1001,43 +1253,31 @@ class WaterJetCalibrationPage(QWidget):
         if not self.is_drawing or self.current_start_point is None:
             return
         
-        # 獲取釋放位置
-        pos = event.pos()
+        # 結束繪製，確認終點
+        # 這裡直接使用 current_end_point，假設 mouseMove 已經更新了最後位置
+        # 如果需要更精確，可以再次計算 event.pos()
         
-        # 將釋放位置轉換為圖像坐標
-        pixmap = self.image_frame.pixmap()
-        if pixmap:
-            # 計算圖像在標籤中的位置
-            img_rect = QRect(0, 0, pixmap.width(), pixmap.height())
-            img_rect.moveCenter(QPoint(self.image_frame.width() // 2, self.image_frame.height() // 2))
+        if self.current_end_point:
+            # 添加起點和終點到標註點列表
+            self.annotation_points.append(self.current_start_point)
+            self.annotation_points.append(self.current_end_point)
             
-            # 檢查點擊是否在圖像內
-            if img_rect.contains(pos):
-                # 計算相對於圖像左上角的坐標
-                x = pos.x() - img_rect.left()
-                y = pos.y() - img_rect.top()
-                
-                # 轉換為原始圖像坐標
-                orig_x = int(x * (self.current_frame.shape[1] / pixmap.width()))
-                orig_y = int(y * (self.current_frame.shape[0] / pixmap.height()))
-                
-                # 更新終點
-                self.current_end_point = (orig_x, orig_y)
-                
-                # 添加起點和終點到標註點列表
-                self.annotation_points.append(self.current_start_point)
-                self.annotation_points.append(self.current_end_point)
-                
-                # 計算當前組
-                group_index = (len(self.annotation_points) - 1) // self.point_per_group
-                
-                print(f"完成繪製向量，從 {self.current_start_point} 到 {self.current_end_point}，第{group_index+1}組")
-                
-                # 重置繪製狀態
-                self.is_drawing = False
-                self.current_start_point = None
-                self.current_end_point = None
-                self.temp_display_frame = None
+            # 計算已完成的組數
+            completed_groups = len(self.annotation_points) // self.point_per_group
+            
+            # 更新UI計數器
+            self.vector_counter.setText(f"Vectors: {completed_groups} / {self.total_groups}")
+            
+            # 檢查是否完成所有向量
+            if completed_groups == self.total_groups:
+                self.update_step_status(3) # 進入 Step 3
+                self.confirm_btn.setEnabled(True) # 啟用確認按鈕
+            
+            # 重置繪製狀態
+            self.is_drawing = False
+            self.current_start_point = None
+            self.current_end_point = None
+            self.temp_display_frame = None
     
     def update_temp_display_frame(self):
         """更新臨時顯示幀，用於顯示正在繪製的向量"""
@@ -1047,26 +1287,20 @@ class WaterJetCalibrationPage(QWidget):
         # 創建臨時顯示幀
         self.temp_display_frame = self.display_frame.copy()
         
-        # 繪製已標註的向量
+        # 繪製已標註的向量 (保持原有的)
         for i in range(0, len(self.annotation_points), self.point_per_group):
             if i + 1 < len(self.annotation_points):
                 start_point = self.annotation_points[i]
                 end_point = self.annotation_points[i + 1]
-                
-                # 繪製向量
                 cv2.arrowedLine(self.temp_display_frame, start_point, end_point, (0, 255, 255), 2)
-                
-                # 繪製起點和終點
                 cv2.circle(self.temp_display_frame, start_point, 5, (0, 0, 255), -1)
                 cv2.circle(self.temp_display_frame, end_point, 5, (255, 0, 0), -1)
-                
-                # 標註組號
                 group_num = i // self.point_per_group + 1
                 cv2.putText(self.temp_display_frame, f"G{group_num}", 
                           (start_point[0] + 10, start_point[1] + 10), 
                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
-        # 繪製當前正在繪製的向量
+        # 繪製當前正在繪製的向量 (綠色)
         cv2.arrowedLine(self.temp_display_frame, self.current_start_point, self.current_end_point, (0, 255, 0), 2)
         cv2.circle(self.temp_display_frame, self.current_start_point, 5, (0, 0, 255), -1)
         cv2.circle(self.temp_display_frame, self.current_end_point, 5, (255, 0, 0), -1)
@@ -1077,27 +1311,26 @@ class WaterJetCalibrationPage(QWidget):
                   (self.current_start_point[0] + 10, self.current_start_point[1] + 10), 
                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
     
-    def request_transformed_frame(self):
-        """請求透視變換後的畫面並擷取當前幀"""
-        print("請求透視變換後的畫面")
-        # 發送請求透視變換後的幀信號
-        self.request_transformed_frame_signal.emit()
-        # 擷取當前幀
-        self.capture_current_frame()
-    
     def reset_annotations(self):
         """重置標註點"""
         self.annotation_points = []
         self.current_start_point = None
         self.current_end_point = None
         self.temp_display_frame = None
-        print("已重置所有標註點")
+        
+        # UI 重置
+        self.vector_counter.setText(f"Vectors: 0 / {self.total_groups}")
+        self.vector_counter.setStyleSheet("font-size: 24px; font-weight: bold; color: #888888; margin: 5px 0;")
+        self.confirm_btn.setEnabled(False)
+        self.update_step_status(2) # 回到 Step 2
+        
+        print("已重置所有射水向量標註")
     
     def send_annotations(self):
         """發送標註點"""
         expected_points = self.total_groups * self.point_per_group
         if len(self.annotation_points) != expected_points:
-            print(f"標註點數量不足，需要 {expected_points} 個點，當前有 {len(self.annotation_points)} 個點")
+            print(f"標註點數量不足，需要 {expected_points} 個點")
             return
         
         # 如果已經在追蹤中，先停止舊的追蹤
@@ -1116,12 +1349,9 @@ class WaterJetCalibrationPage(QWidget):
         # 發送射水向量信號
         self.water_jet_vectors_signal.emit(water_jet_vectors)
         
-        # 發送後重置標註點
-        self.reset_annotations()
-        # 重置顯示幀狀態，清除 image_frame 上的編輯內容
-        self.is_frame_captured = False
-        self.display_frame = None
-
+        # UI 狀態更新
+        self.update_step_status(3)
+        
         # 啟動新的追蹤
         self.start_tracking()
 
@@ -1130,95 +1360,62 @@ class WaterJetCalibrationPage(QWidget):
         print("停止追蹤模式")
         self.tracking_active = False
         
+        w = self.tracking_display.width() if self.tracking_display.width() > 0 else 320
+        h = self.tracking_display.height() if self.tracking_display.height() > 0 else 320
+
         # 清除追蹤顯示
-        blank_frame = np.zeros((320, 320, 3), dtype=np.uint8)
-        blank_frame[:] = (245, 245, 245)  # 淺灰色背景
+        blank_frame = np.zeros((h, w, 3), dtype=np.uint8) # 調整大小匹配UI
+        blank_frame[:] = (240, 240, 240)
         
-        # 將空白圖像轉換為Qt圖像並顯示
         height, width, channel = blank_frame.shape
         bytes_per_line = 3 * width
         q_img = QImage(blank_frame.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
         
-        # 重置顯示
-        self.tracking_display.setPixmap(QPixmap.fromImage(q_img))
-        self.flowmap_display.setPixmap(QPixmap.fromImage(q_img))
+        pixmap = QPixmap.fromImage(q_img)
+
+        self.tracking_display.setPixmap(pixmap)
+        self.flowmap_display.setPixmap(pixmap)
     
     def update_tracking_display(self, frame):
-        """更新追蹤畫面"""
+        """更新追蹤畫面 (顯示在右側小視窗)"""
         if frame is not None and self.tracking_active:
-            # 獲取顯示區域的大小
-            display_width = self.tracking_display.width()
-            display_height = self.tracking_display.height()
+            # 調整大小以適應 240x240 的顯示區域
+            # display_frame = cv2.resize(frame, (240, 240), interpolation=cv2.INTER_LANCZOS4)
             
-            # 獲取原始圖像的尺寸
-            h, w = frame.shape[:2]
-            aspect_ratio = w / h
-            
-            # 計算保持比例的縮放尺寸
-            if display_width / display_height > aspect_ratio:
-                # 顯示區域更寬，以高度為準
-                new_height = display_height
-                new_width = int(new_height * aspect_ratio)
-            else:
-                # 顯示區域更高，以寬度為準
-                new_width = display_width
-                new_height = int(new_width / aspect_ratio)
-            
-            # 調整大小以適應顯示區域，保持原始比例
-            display_frame = cv2.resize(frame, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
-            
-            # 將OpenCV圖像轉換為Qt圖像
-            height, width, channel = display_frame.shape
+            height, width, channel = frame.shape
             bytes_per_line = 3 * width
-            q_img = QImage(display_frame.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
-            
-            # 顯示圖像（不需要再次縮放）
+            q_img = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
             pixmap = QPixmap.fromImage(q_img)
-            self.tracking_display.setPixmap(pixmap)
+            scaled_pixmap = pixmap.scaled(self.tracking_display.size(), 
+                                        Qt.KeepAspectRatio, 
+                                        Qt.SmoothTransformation)
+            self.tracking_display.setPixmap(scaled_pixmap)
 
     def update_flowmap_display(self, flowmap):
-        """更新FlowMap顯示"""
+        """更新FlowMap顯示 (顯示在右側小視窗)"""
         if flowmap is not None and self.tracking_active:
-            # 獲取顯示區域的大小
-            display_width = self.flowmap_display.width()
-            display_height = self.flowmap_display.height()
+            # display_flowmap = cv2.resize(flowmap, (240, 240), interpolation=cv2.INTER_LANCZOS4)
             
-            # 獲取原始圖像的尺寸
-            h, w = flowmap.shape[:2]
-            aspect_ratio = w / h
-            
-            # 計算保持比例的縮放尺寸
-            if display_width / display_height > aspect_ratio:
-                # 顯示區域更寬，以高度為準
-                new_height = display_height
-                new_width = int(new_height * aspect_ratio)
-            else:
-                # 顯示區域更高，以寬度為準
-                new_width = display_width
-                new_height = int(new_width / aspect_ratio)
-            
-            # 調整大小以適應顯示區域，保持原始比例
-            display_flowmap = cv2.resize(flowmap, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
-            
-            # 將OpenCV圖像轉換為Qt圖像
-            height, width, channel = display_flowmap.shape
+            height, width, channel = flowmap.shape
             bytes_per_line = 3 * width
-            q_img = QImage(display_flowmap.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
-            
-            # 顯示圖像（不需要再次縮放）
+            q_img = QImage(flowmap.data, width, height, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
+
             pixmap = QPixmap.fromImage(q_img)
-            self.flowmap_display.setPixmap(pixmap)
+
+            scaled_pixmap = pixmap.scaled(self.flowmap_display.size(), 
+                                        Qt.KeepAspectRatio, 
+                                        Qt.SmoothTransformation)
+            
+            self.flowmap_display.setPixmap(scaled_pixmap)
 
     def start_tracking(self):
         """開始追蹤模式"""
         print("開始追蹤模式")
         self.tracking_active = True
-        
-        # 發送開始追蹤信號到主窗口
         self.parent.start_tracking_signal.emit()
     
     def go_to_previous_step(self):
-        """切換至上一步(透視變換編輯頁面)"""
+        """切換至上一步"""
         self.parent.show_perspective_page()
     
     def reset_ui_display(self):
@@ -1232,16 +1429,20 @@ class WaterJetCalibrationPage(QWidget):
         self.temp_display_frame = None
         self.tracking_active = False
         
-        # 重置圖像顯示[顯示透變換後結果畫面]
-        blank_frame = np.zeros((512, 512, 3), dtype=np.uint8)
-        blank_frame[:] = (245, 245, 240)  # 淺米色
-        self.display_frame = blank_frame
+        # 重置指引UI
+        self.vector_counter.setText(f"Vectors: 0 / {self.total_groups}")
+        self.vector_counter.setStyleSheet("font-size: 24px; font-weight: bold; color: #888888; margin: 5px 0;")
+        self.update_step_status(1)
+        self.confirm_btn.setEnabled(False)
+        self.image_frame.setStyleSheet("background-color: rgba(0,0,0,0.05); border-radius: 10px; border: 2px dashed #CCCCCC;")
 
-        # 清空追蹤和FlowMap顯示區域
+        # 清空顯示
         self.tracking_display.clear()
         self.flowmap_display.clear()
-
-        # 更新主顯示
+        
+        blank_frame = np.zeros((512, 512, 3), dtype=np.uint8)
+        blank_frame[:] = (245, 245, 240)
+        self.display_frame = blank_frame
         self.update_frame()
         print("射水向量編輯頁面UI顯示已重置")
 
