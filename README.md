@@ -17,15 +17,15 @@ This system utilizes a **Server-Client architecture** to bridge the Python-based
 
 * **Pool Shape Selection**
   Supports both `circular` and `rectangular` pool geometries. The selection dynamically adapts the underlying algorithm logic for accurate simulation.
-  ![Pool Selection Demo](Doc\Stage1.gif)
+  ![Pool Selection Demo](Doc/Stage1.gif)
 
 * **Perspective Transform Reference Point Editing**
   Provides an interactive interface to define 4 reference points, calculating the `Perspective Transformation Matrix`. This converts camera feeds into a top-down view to optimize `ArUco Marker` tracking accuracy.
-  ![Reference Point Editing Demo](Doc\Stage2.gif)
+  ![Reference Point Editing Demo](Doc/Stage2.gif)
 
 * **Water Jet Vector Editing**
   Allows intuitive mouse-based control to define the pump position, jet direction, and flow reach. This enables the real-time generation of the `Flowmap` based on physical marker interactions.
-  ![Water Jet Vector Editing Demo](Doc\FinalStage.gif)
+  ![Water Jet Vector Editing Demo](Doc/FinalStage.gif)
 
 * **Real-Time Data Transmission**
   Operates over a `TCP/IP` connection where the Editor (Server) transmits the generated `Flowmap` to the VR headset (Client) instantly upon request.
