@@ -8,6 +8,9 @@
 ![Platform](https://img.shields.io/badge/Platform-Meta_Quest_3-purple?logo=meta)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
+## 🏆 Accepted to SIGGRAPH 2025 (Poster)
+Authors' implementation of the paper <strong>Exploring Real-Time Water Surface Simulation for Immersive Virtual Reality Using Marker-Based Tracking</strong> [**[ Read the Paper]**](https://dl.acm.org/doi/full/10.1145/3721250.3742995)
+
 ## 📖 About the Project
 This project presents a real-time water flow simulation editing system that integrates **Computer Vision** and **Virtual Reality**. The system consists of two core modules: an editing tool developed in `Python` (`PyQt5`) and a VR visualization client built on the `Unity` engine. The editing tool dynamically generates a `Flowmap` by detecting physical `ArUco Markers`. Then, using the `TCP/IP Socket` protocol, it transmits the Flowmap to the `Meta Quest 3` device for rendering, enabling real-time water flow simulation within the virtual environment.
 
@@ -61,7 +64,7 @@ WaterSimulation/
 ## 🚀 Getting Started
 
 ### Installation
-First, repository using the "Code" button above or or using the following command:
+First, clone repository using the "Code" button above or or using the following command:
 ```sh
 git clone https://github.com/Li-En-Lai/WaterSimulation.git
 ```
@@ -132,3 +135,15 @@ To open the project,you need **UnityHub**
     * Press ```A``` Button: Request the Server to **start transmitting** the generated ```Flowmap```.
     * Press ```B``` Button: Request the Server to **stop transmission**.
 
+## 🎓 Citation
+
+If you find this project useful for your research, please cite our poster:
+```bibtex
+@inproceedings{lai2025exploring,
+  title={Exploring Real-Time Water Surface Simulation for Immersive Virtual Reality Using Marker-Based Tracking},
+  author={Lai, Li-En and Lin, Chi-Yu and Pan, Tse-Yu and Han, Ping-Hsuan},
+  booktitle={Proceedings of the Special Interest Group on Computer Graphics and Interactive Techniques Conference Posters},
+  pages={1--2},
+  year={2025}
+}
+```
